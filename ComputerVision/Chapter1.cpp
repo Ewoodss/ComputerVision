@@ -1,10 +1,10 @@
-//#include <opencv2/imgcodecs.hpp>
-//#include <opencv2/highgui.hpp>
-//#include <opencv2/imgproc.hpp>
-//#include <iostream>
-//
-//using namespace cv;
-//using namespace std;
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <iostream>
+
+using namespace cv;
+using namespace std;
 //
 //
 ///////////////////  Images  //////////////////////
@@ -38,15 +38,15 @@
 //
 ///////////////////  Webcam  //////////////////////
 //
-//void main() {
-//
-//	VideoCapture cap(0);
-//	Mat img;
-//
-//	while (true) {
-//
-//		cap.read(img);
-//		imshow("Image", img);
-//		waitKey(1);
-//	}
-//}
+void main() {
+
+	VideoCapture cap(0);
+	Mat img;
+
+	while (true) {
+
+		cap.read(img);
+		imshow("Image", img);
+		waitKey(1);
+	}
+}
