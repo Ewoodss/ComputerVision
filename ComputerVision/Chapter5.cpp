@@ -22,9 +22,9 @@ void main()
 	matrix = getPerspectiveTransform(src, dst);
 	warpPerspective(img, imgWarp, matrix, Point(w, h));
 
-	for (int i = 0; i < 4; i++)
+	for (auto& i : src)
 	{
-		circle(img, src[i], 10, Scalar(0, 0, 255), FILLED);
+		circle(img, i, 10, Scalar(0, 0, 255), FILLED);
 	}
 
 	resize(img, img, Size(), 0.4, 0.4);

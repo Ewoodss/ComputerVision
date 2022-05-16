@@ -1,32 +1,36 @@
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <iostream>
-
+#include "opencv2/imgproc.hpp"
+#include "opencv2/highgui.hpp"
 using namespace cv;
-using namespace std;
-//
-/////////////////  Basic Functions  //////////////////////
 
-void main() {
+Mat src, src_gray;
+Mat dst, detected_edges;
+int lowThreshold = 0;
+int maxThreshold = 0;
+const char* window_name = "window";
 
-	string path = "Resources/test.png";
-	Mat img = imread(path);
-	Mat imgGray, imgBlur, imgCanny, imgDil, imgErode;
+int main()
+{
+	std::string path = "Resources/flower.jpg";
+	src = imread(path);
 
-	cvtColor(img, imgGray, COLOR_BGR2GRAY);
-	GaussianBlur(imgGray, imgBlur, Size(7, 7), 5, 0);
-	Canny(imgBlur, imgCanny, 25, 75);
+	dst.create(src.size(), src.type());
+	cvtColor(src, src_gray, COLOR_BGR2GRAY);
+	namedWindow(window_name, WINDOW_AUTOSIZE);
 
-	Mat kernel = getStructuringElement(MORPH_RECT, Size(3, 3));
-	dilate(imgCanny, imgDil, kernel);
-	erode(imgDil, imgErode, kernel);
+	createTrackbar("Min Threshold:", window_name, &lowThreshold, 1000);
+	createTrackbar("Max Threshold:", window_name, &maxThreshold, 1000);
 
-	imshow("Image", img);
-	imshow("Image Gray", imgGray);
-	imshow("Image Blur", imgBlur);
-	imshow("Image Canny", imgCanny);
-	imshow("Image Dilation", imgDil);
-	imshow("Image Erode", imgErode);
+	while (true)
+	{
+		blur(src_gray, detected_edges, Size(3, 3));
+		Canny(detected_edges, detected_edges, lowThreshold, maxThreshold, 3);
+		dst = Scalar::all(0);
+		src.copyTo(dst, detected_edges);
+		imshow(window_name, dst);
+
+		waitKey(1000);
+	}
+
 	waitKey(0);
+	return 0;
 }
