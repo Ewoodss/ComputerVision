@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Chapter8.cpp" />
     <ClCompile Include="eindopdracht.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
