@@ -20,7 +20,7 @@ void preProcces1(const Mat& inputImg, Mat& outputImg);
 
 void main()
 {
-	Mat img = imread("Resources/KentekensRU4.jpg");
+	Mat img = imread("Resources/KentekensRU.jpg");
 
 	CascadeClassifier plateCascade;
 	plateCascade.load("Resources/haarcascade_russian_plate_number.xml");
@@ -64,44 +64,50 @@ void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber)
 
 	//drawContours(outputImg, contours, -1, Scalar(255, 0, 255), 2);
 
-	vector<vector<Point>> conPoly(contours.size());
-	vector<Rect> boundRect(contours.size());
+	vector<Point> conPoly;
+	Rect boundRect;
 
 
-	for (int i = 0; i < contours.size(); i++)
+	vector<Point> biggestContour;
+	double biggestArea = -1;
+
+	for (auto contour : contours)
 	{
-		int area = (int)contourArea(contours[i]);
-		cout << area << endl;
-
-		if (area < 6000) continue;
-
-		cout << "ran" << endl;
-
-		float peri = arcLength(contours[i], true);
-		approxPolyDP(contours[i], conPoly[i], 0.01 * peri, true);
-		cout << conPoly[i].size() << endl;
-		boundRect[i] = boundingRect(conPoly[i]);
-
-		try 
+		auto erea = contourArea(contour);
+		if (true)
 		{
-			//rectangle(inputImg, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 5);
-			zoomImg = inputImg(boundRect[i]);
-
-			imshow(to_string(plateNumber*100 + i), zoomImg);
-
-			getCharacters(zoomImg, test, plateNumber);
+			if (erea > biggestArea)
+			{
+				biggestArea = erea;
+				biggestContour = contour;
+			}
 		}
-		catch (Exception e)
-		{
-			cout << e.what() << endl;
-		}
-
-		outputImg = inputImg;
-
-		//outputImg = inputImg({ boundRect[i].tl() ,boundRect[i].br() });
-
-		//rectangle(outputImg, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 5);
 	}
+
+
+	float peri = arcLength(biggestContour, true);
+	approxPolyDP(biggestContour, conPoly, 0.01 * peri, true);
+	cout << conPoly.size() << endl;
+	boundRect = boundingRect(conPoly);
+
+	try
+	{
+		rectangle(inputImg, boundRect.tl(), boundRect.br(), Scalar(0, 255, 0), 5);
+		zoomImg = inputImg(boundRect);
+
+		getCharacters(zoomImg, test, plateNumber);
+	}
+	catch (Exception e)
+	{
+		cout << e.what() << endl;
+	}
+
+	outputImg = test;
+
+	//outputImg = inputImg({ boundRect[i].tl() ,boundRect[i].br() });
+
+	//rectangle(outputImg, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 5);
+
 
 	//getCharacters(zoomImg, outputImg);
 
@@ -148,13 +154,14 @@ void getCharacters(const Mat& inputImg, Mat& outputImg, int plateNumber)
 
 void preProcces1(const Mat& inputImg, Mat& outputImg)
 {
-	Mat imgGray, imgBlur, imgCanny;
+	Mat imgGray, imgBlur, imgCanny,imgDilate;
 	cvtColor(inputImg, imgGray, COLOR_BGR2GRAY);
 	GaussianBlur(imgGray, imgBlur, Size(0, 0), 3, 3);
 	Canny(imgBlur, imgCanny, 20, 60);
-	Mat kernel = getStructuringElement(MORPH_RECT, Size(3, 3));
+	Mat dilateKernel = getStructuringElement(MORPH_RECT, Size(3, 3));
 
-	dilate(imgCanny, outputImg, kernel);
+	dilate(imgCanny, outputImg, dilateKernel);
+	imshow("testing", outputImg);
 	// erode(imgCanny, outputImg, kernel);
 }
 
