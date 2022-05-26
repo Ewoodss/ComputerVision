@@ -13,8 +13,8 @@ void getContours(Mat imgDil, Mat& img);
 
 int cannyThreshold = 25;
 
-void licensePlate(const Mat& inputImg, Mat& outputImg);
-void getCharacters(const Mat& inputImg, Mat& outputImg);
+void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber);
+void getCharacters(const Mat& inputImg, Mat& outputImg, int plateNumber);
 void preProcces1(const Mat& inputImg, Mat& outputImg);
 
 
@@ -40,8 +40,7 @@ void main()
 		// preProcessPlate(plateImgOriginal, plateImgResult, i);
 		// getContours(plateImgResult, plateImgOriginal);
 
-
-		licensePlate(plateImgOriginal, plateImgOriginal);
+		licensePlate(plateImgOriginal, plateImgOriginal, i);
 
 		imshow(to_string(i), plateImgOriginal);
 		//rectangle(img, plates[i].tl(), plates[i].br(), Scalar(255, 0, 255), 3);
@@ -52,15 +51,14 @@ void main()
 	// }
 }
 
-void licensePlate(const Mat& inputImg, Mat& outputImg)
+void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber)
 {
-	Mat  zoomImg, imgDil,test;
+	Mat zoomImg, imgDil, test;
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
 
 
 	preProcces1(inputImg, imgDil);
-
 	findContours(imgDil, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 
 	//drawContours(outputImg, contours, -1, Scalar(255, 0, 255), 2);
@@ -85,10 +83,10 @@ void licensePlate(const Mat& inputImg, Mat& outputImg)
 
 		zoomImg = inputImg(boundRect[i]);
 
-		getCharacters(zoomImg, test);
+		getCharacters(zoomImg, test, plateNumber);
 
 		outputImg = test;
-		
+
 		//outputImg = inputImg({ boundRect[i].tl() ,boundRect[i].br() });
 
 		//rectangle(outputImg, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 5);
@@ -101,7 +99,7 @@ void licensePlate(const Mat& inputImg, Mat& outputImg)
 	//outputImg = imgBlur;
 }
 
-void getCharacters(const Mat& inputImg, Mat& outputImg)
+void getCharacters(const Mat& inputImg, Mat& outputImg, int plateNumber)
 {
 	inputImg.copyTo(outputImg);
 
@@ -129,11 +127,12 @@ void getCharacters(const Mat& inputImg, Mat& outputImg)
 
 		rectangle(outputImg, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 1);
 		Mat resultImg = inputImg(boundRect[i]);
-		imwrite("./Resources/Plates/" + to_string(i) + ".jpg", resultImg);
+		std::string imageName = "nummerbord" + to_string(plateNumber) + "_ " + to_string(i);
+
+		imwrite("./Resources/Plates/" + imageName + ".jpg", resultImg);
 		//putText(outputImg, to_string(aspectRatio), {boundRect[i].x,boundRect[i].y}, FONT_HERSHEY_PLAIN, 1, Scalar(0, (i * 30 % 255), 255), 2);
 	}
 }
-
 
 
 void preProcces1(const Mat& inputImg, Mat& outputImg)
