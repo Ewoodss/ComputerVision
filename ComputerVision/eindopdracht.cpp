@@ -44,7 +44,6 @@ void main()
 		licensePlate(plateImgOriginal, plateImgOriginal);
 
 		imshow(to_string(i), plateImgOriginal);
-		imwrite("/Resources/Plates/" + to_string(i) + ".png", plateImgOriginal);
 		//rectangle(img, plates[i].tl(), plates[i].br(), Scalar(255, 0, 255), 3);
 	}
 
@@ -104,11 +103,35 @@ void licensePlate(const Mat& inputImg, Mat& outputImg)
 
 void getCharacters(const Mat& inputImg, Mat& outputImg)
 {
+	inputImg.copyTo(outputImg);
 
-	preProcces1(inputImg, outputImg);
+	Mat preProcessOutput;
+	preProcces1(inputImg, preProcessOutput);
 
+	vector<vector<Point>> contours;
+	vector<Vec4i> hierarchy;
 
+	findContours(preProcessOutput, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 
+	vector<vector<Point>> conPoly(contours.size());
+	vector<Rect> boundRect(contours.size());
+
+	for (int i = 0; i < contours.size(); i++)
+	{
+		float peri = arcLength(contours[i], true);
+		approxPolyDP(contours[i], conPoly[i], 0.01 * peri, true);
+		boundRect[i] = boundingRect(conPoly[i]);
+		int area = (boundRect[i].height) * boundRect[i].width;
+		float aspectRatio = (float)boundRect[i].height / boundRect[i].width;
+
+		if (area < 400) continue;
+		if (aspectRatio < 1) continue;
+
+		rectangle(outputImg, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 1);
+		Mat resultImg = inputImg(boundRect[i]);
+		imwrite("./Resources/Plates/" + to_string(i) + ".jpg", resultImg);
+		//putText(outputImg, to_string(aspectRatio), {boundRect[i].x,boundRect[i].y}, FONT_HERSHEY_PLAIN, 1, Scalar(0, (i * 30 % 255), 255), 2);
+	}
 }
 
 
