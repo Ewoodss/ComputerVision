@@ -10,6 +10,7 @@ using namespace std;
 
 void preProcessPlate(Mat& img, Mat& resultImg, int i = 0);
 void getContours(Mat imgDil, Mat& img);
+void deleteDirectoryContents(const std::string& dir_path);
 
 int cannyThreshold = 25;
 void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber);
@@ -19,7 +20,7 @@ void preProcces1(const Mat& inputImg, Mat& outputImg);
 
 void main()
 {
-	Mat img = imread("Resources/KentekensRU2.jpg");
+	Mat img = imread("Resources/KentekensRU4.jpg");
 
 	CascadeClassifier plateCascade;
 	plateCascade.load("Resources/haarcascade_russian_plate_number.xml");
@@ -58,6 +59,7 @@ void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber)
 
 
 	preProcces1(inputImg, imgDil);
+
 	findContours(imgDil, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 
 	//drawContours(outputImg, contours, -1, Scalar(255, 0, 255), 2);
@@ -80,11 +82,21 @@ void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber)
 		cout << conPoly[i].size() << endl;
 		boundRect[i] = boundingRect(conPoly[i]);
 
-		zoomImg = inputImg(boundRect[i]);
+		try 
+		{
+			//rectangle(inputImg, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 5);
+			zoomImg = inputImg(boundRect[i]);
 
-		getCharacters(zoomImg, test, plateNumber);
+			imshow(to_string(plateNumber*100 + i), zoomImg);
 
-		outputImg = test;
+			getCharacters(zoomImg, test, plateNumber);
+		}
+		catch (Exception e)
+		{
+			cout << e.what() << endl;
+		}
+
+		outputImg = inputImg;
 
 		//outputImg = inputImg({ boundRect[i].tl() ,boundRect[i].br() });
 
@@ -122,7 +134,7 @@ void getCharacters(const Mat& inputImg, Mat& outputImg, int plateNumber)
 		float aspectRatio = (float)boundRect[i].height / boundRect[i].width;
 
 		if (area < 400) continue;
-		if (aspectRatio < 1) continue;
+		if (aspectRatio < 1 || aspectRatio > 3) continue;
 
 		rectangle(outputImg, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 1);
 		Mat resultImg = inputImg(boundRect[i]);
@@ -146,49 +158,8 @@ void preProcces1(const Mat& inputImg, Mat& outputImg)
 	// erode(imgCanny, outputImg, kernel);
 }
 
-//
-// void getContours(Mat imgDil, Mat& img)
-// {
-// 	vector<vector<Point>> contours;
-// 	vector<Vec4i> hierarchy;
-//
-// 	findContours(imgDil, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-// 	//drawContours(img, contours, -1, Scalar(255, 0, 255), 2);
-//
-// 	vector<vector<Point>> conPoly(contours.size());
-// 	vector<Rect> boundRect(contours.size());
-//
-// 	for (int i = 0; i < contours.size(); i++)
-// 	{
-// 		int area = contourArea(contours[i]);
-// 		cout << area << endl;
-// 		string objectType;
-//
-// 		if (area > 10000)
-// 		{
-// 			float peri = arcLength(contours[i], true);
-// 			approxPolyDP(contours[i], conPoly[i], 0.03 * peri, true);
-// 			cout << conPoly[i].size() << endl;
-// 			boundRect[i] = boundingRect(conPoly[i]);
-//
-// 			int objCor = (int)conPoly[i].size();
-//
-// 			if (objCor != 4) continue;
-//
-// 			drawContours(img, conPoly, i, Scalar(255, 0, 255), 2);
-// 			//rectangle(img, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 5);
-// 			//putText(img, objectType, { boundRect[i].x,boundRect[i].y - 5 }, FONT_HERSHEY_PLAIN, 1, Scalar(0, 69, 255), 2);
-// 		}
-// 	}
-// }
-//
-// void preProcessPlate(Mat& img, Mat& resultImg, int i)
-// {
-// 	Mat imgGray, imgBlur, imgCanny, imgDil, imgErode;
-// 	cvtColor(img, imgGray, COLOR_BGR2GRAY);
-// 	GaussianBlur(imgGray, imgBlur, Size(3, 3), 3, 0);
-// 	Canny(imgBlur, imgCanny, cannyThreshold, cannyThreshold * 3);
-// 	//imshow(to_string(i+10), imgCanny);
-// 	Mat kernel = getStructuringElement(MORPH_RECT, Size(3, 3));
-// 	dilate(imgCanny, resultImg, kernel);
-// }
+void deleteDirectoryContents(const std::string& dir_path)
+{
+	//for (const auto& entry : std::filesystem::directory_iterator(dir_path))
+	//	std::filesystem::remove_all(entry.path());
+}
