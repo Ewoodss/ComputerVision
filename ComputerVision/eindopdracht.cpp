@@ -12,7 +12,6 @@ void preProcessPlate(Mat& img, Mat& resultImg, int i = 0);
 void getContours(Mat imgDil, Mat& img);
 
 int cannyThreshold = 25;
-
 void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber);
 void getCharacters(const Mat& inputImg, Mat& outputImg, int plateNumber);
 void preProcces1(const Mat& inputImg, Mat& outputImg);
@@ -20,7 +19,7 @@ void preProcces1(const Mat& inputImg, Mat& outputImg);
 
 void main()
 {
-	Mat img = imread("Resources/KentekensRU.jpg");
+	Mat img = imread("Resources/KentekensRU2.jpg");
 
 	CascadeClassifier plateCascade;
 	plateCascade.load("Resources/haarcascade_russian_plate_number.xml");
@@ -72,7 +71,7 @@ void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber)
 		int area = (int)contourArea(contours[i]);
 		cout << area << endl;
 
-		if (area < 10000) continue;
+		if (area < 6000) continue;
 
 		cout << "ran" << endl;
 
