@@ -29,26 +29,17 @@ void main()
 
 	vector<Rect> plates;
 
-	// while (true)
-	// {
 	plateCascade.detectMultiScale(img, plates, 1.1, 10);
 
 	for (int i = 0; i < plates.size(); i++)
 	{
 		Mat plateImgOriginal = img(plates[i]);
-		// Mat plateImgResult;
-		// preProcessPlate(plateImgOriginal, plateImgResult, i);
-		// getContours(plateImgResult, plateImgOriginal);
-
 		licensePlate(plateImgOriginal, plateImgOriginal, i);
-
 		imshow(to_string(i), plateImgOriginal);
-		//rectangle(img, plates[i].tl(), plates[i].br(), Scalar(255, 0, 255), 3);
 	}
 
 	imshow("Image", img);
 	waitKey(0);
-	// }
 }
 
 void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber)
@@ -59,10 +50,7 @@ void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber)
 
 
 	preProcces1(inputImg, imgDil);
-
 	findContours(imgDil, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-
-	//drawContours(outputImg, contours, -1, Scalar(255, 0, 255), 2);
 
 	vector<Point> conPoly;
 	Rect boundRect;
@@ -74,16 +62,12 @@ void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber)
 	for (auto contour : contours)
 	{
 		auto erea = contourArea(contour);
-		if (true)
+		if (erea > biggestArea)
 		{
-			if (erea > biggestArea)
-			{
-				biggestArea = erea;
-				biggestContour = contour;
-			}
+			biggestArea = erea;
+			biggestContour = contour;
 		}
 	}
-
 
 	float peri = arcLength(biggestContour, true);
 	approxPolyDP(biggestContour, conPoly, 0.01 * peri, true);
@@ -103,17 +87,6 @@ void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber)
 	}
 
 	outputImg = test;
-
-	//outputImg = inputImg({ boundRect[i].tl() ,boundRect[i].br() });
-
-	//rectangle(outputImg, boundRect[i].tl(), boundRect[i].br(), Scalar(0, 255, 0), 5);
-
-
-	//getCharacters(zoomImg, outputImg);
-
-	//Canny(imgBlur, imgCanny, cannyThreshold, cannyThreshold * 3);
-
-	//outputImg = imgBlur;
 }
 
 void getCharacters(const Mat& inputImg, Mat& outputImg, int plateNumber)
@@ -147,26 +120,21 @@ void getCharacters(const Mat& inputImg, Mat& outputImg, int plateNumber)
 		std::string imageName = "nummerbord" + to_string(plateNumber) + "_ " + to_string(i);
 
 		imwrite("./Resources/Plates/" + imageName + ".jpg", resultImg);
-		//putText(outputImg, to_string(aspectRatio), {boundRect[i].x,boundRect[i].y}, FONT_HERSHEY_PLAIN, 1, Scalar(0, (i * 30 % 255), 255), 2);
 	}
 }
 
 
 void preProcces1(const Mat& inputImg, Mat& outputImg)
 {
-	Mat imgGray, imgBlur, imgCanny,imgDilate;
+	Mat imgGray, imgBlur, imgCanny, imgDilate;
 	cvtColor(inputImg, imgGray, COLOR_BGR2GRAY);
 	GaussianBlur(imgGray, imgBlur, Size(0, 0), 3, 3);
-	Canny(imgBlur, imgCanny, 20, 60);
-	Mat dilateKernel = getStructuringElement(MORPH_RECT, Size(3, 3));
+
+	auto canny = 20; //needs to be changed per image
+
+	Canny(imgBlur, imgCanny, canny, canny * 3);
+	Mat dilateKernel = getStructuringElement(MORPH_DILATE, Size(4, 3));
+	Mat erodeKernel = getStructuringElement(MORPH_ERODE, Size(3, 3));
 
 	dilate(imgCanny, outputImg, dilateKernel);
-	imshow("testing", outputImg);
-	// erode(imgCanny, outputImg, kernel);
-}
-
-void deleteDirectoryContents(const std::string& dir_path)
-{
-	//for (const auto& entry : std::filesystem::directory_iterator(dir_path))
-	//	std::filesystem::remove_all(entry.path());
 }
