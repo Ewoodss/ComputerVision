@@ -20,7 +20,7 @@ void preProcces1(const Mat& inputImg, Mat& outputImg);
 
 void main()
 {
-	Mat img = imread("Resources/KentekensRU.jpg");
+	Mat img = imread("Resources/KentekensRU2.jpg");
 
 	CascadeClassifier plateCascade;
 	plateCascade.load("Resources/haarcascade_russian_plate_number.xml");
@@ -53,7 +53,6 @@ void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber)
 	findContours(imgDil, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 
 	vector<Point> conPoly;
-	Rect boundRect;
 
 
 	vector<Point> biggestContour;
@@ -69,10 +68,10 @@ void licensePlate(const Mat& inputImg, Mat& outputImg, int plateNumber)
 		}
 	}
 
-	float peri = arcLength(biggestContour, true);
+	const float peri = arcLength(biggestContour, true);
 	approxPolyDP(biggestContour, conPoly, 0.01 * peri, true);
 	cout << conPoly.size() << endl;
-	boundRect = boundingRect(conPoly);
+	const Rect boundRect = boundingRect(conPoly);
 
 	try
 	{
@@ -106,11 +105,11 @@ void getCharacters(const Mat& inputImg, Mat& outputImg, int plateNumber)
 
 	for (int i = 0; i < contours.size(); i++)
 	{
-		float peri = arcLength(contours[i], true);
+		const float peri = arcLength(contours[i], true);
 		approxPolyDP(contours[i], conPoly[i], 0.01 * peri, true);
 		boundRect[i] = boundingRect(conPoly[i]);
-		int area = (boundRect[i].height) * boundRect[i].width;
-		float aspectRatio = (float)boundRect[i].height / boundRect[i].width;
+		const int area = (boundRect[i].height) * boundRect[i].width;
+		const float aspectRatio = static_cast<float>(boundRect[i].height) / boundRect[i].width;
 
 		if (area < 400) continue;
 		if (aspectRatio < 1 || aspectRatio > 3) continue;
@@ -130,11 +129,10 @@ void preProcces1(const Mat& inputImg, Mat& outputImg)
 	cvtColor(inputImg, imgGray, COLOR_BGR2GRAY);
 	GaussianBlur(imgGray, imgBlur, Size(0, 0), 3, 3);
 
-	auto canny = 20; //needs to be changed per image
+	auto canny = 17; //needs to be changed per image
 
 	Canny(imgBlur, imgCanny, canny, canny * 3);
 	Mat dilateKernel = getStructuringElement(MORPH_DILATE, Size(4, 3));
-	Mat erodeKernel = getStructuringElement(MORPH_ERODE, Size(3, 3));
 
 	dilate(imgCanny, outputImg, dilateKernel);
 }
